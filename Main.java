@@ -1,3 +1,5 @@
+//-----Main Frame for TrickyBird----
+
 import javax.swing.*;
 public class Main {
     public static void main(String[] args)
@@ -22,3 +24,5 @@ public class Main {
         frame.setVisible(true);
     }
 }
+
+// ----End Main Frame-----
