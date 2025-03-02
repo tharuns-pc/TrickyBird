@@ -3,6 +3,9 @@ import javax.swing.Timer;
 import java.awt.event.*;
 import java.util.*;
 import java.awt.*;
+import javax.sound.sampled.*;
+import java.lang.Thread;
+import java.io.*;
 
 public class TrickyBird extends JPanel implements ActionListener, KeyListener{
     int fWidth=360;
@@ -44,6 +47,28 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
             this.img=img;
         }
     }
+    
+    public static class Sound
+    {
+    	Clip weeClip;
+
+    	public Sound() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+    	    File wee = new File("wee.wav");
+    	    AudioInputStream weeAudio = AudioSystem.getAudioInputStream(wee);
+    	    weeClip = AudioSystem.getClip();
+    	    weeClip.open(weeAudio);
+    	}
+
+    	public void weeSound() {
+    	    if (weeClip.isRunning()) {
+    	        weeClip.stop();
+    	    }
+    	    weeClip.setFramePosition(0);
+    	    weeClip.start();
+    	}
+
+    	
+    }
 
     Bird bird;
     Timer gameloop;
@@ -72,7 +97,7 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
         gameloop.start();
 
         pipes = new ArrayList<>();
-        PlacePipesTimer = new Timer(1500,new ActionListener() {
+        PlacePipesTimer = new Timer(2000,new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e)
             {
@@ -134,7 +159,7 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
         // g.drawString("Created By Tharun", (fWidth/2)+35, fheight-10);
        
     }
-    public void move()
+    public void move() throws UnsupportedAudioFileException, IOException, LineUnavailableException, InterruptedException
     {
         VelocityY+=gravity;
         bird.birdY+=VelocityY;
@@ -145,8 +170,11 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
             pipe.x+=VelocityX;
             if(!pipe.passed &&bird.birdX > pipe.x + pipe.width)
             {
+            	
                 pipe.passed=true;
                 score +=0.5;
+                Sound sound =new Sound();
+            	sound.weeSound();
             }
             if(hit(bird, pipe))
             {
@@ -168,7 +196,12 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
     @Override
     public void actionPerformed(ActionEvent e) {
        
-        move();
+        try {
+			move();
+		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException | InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
         repaint();
         if(gameOver)
         {
