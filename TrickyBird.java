@@ -8,6 +8,7 @@ import java.lang.Thread;
 import java.io.*;
 
 public class TrickyBird extends JPanel implements ActionListener, KeyListener{
+     //----Image and frame size declarations----
     int fWidth=360;
     int fheight=640;
     Image bgImg;
@@ -16,19 +17,27 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
     Image BottomPipe;
     Image tk;
     Image spacebutton;
+
+    //----END----
+ 
+     //----Bird Positions declarations----
     
     public class Bird
     {
     int birdX=fWidth/8;
     int birdY=fheight/2;
-    int birdWidth=54;
-    int birdHeight=54;
+    int birdWidth=52;
+    int birdHeight=52;
     Image img;
     Bird(Image img)
     {
         this.img=img;
     }
     }
+     //----END----
+ 
+ 
+     //----Pipes Positions Declarations----
 
         int pipeX=fWidth;
         int pipeY=0;
@@ -47,6 +56,11 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
             this.img=img;
         }
     }
+
+    //----END----
+
+
+    //----Game SFX Declarations and Sound Effects----
     
     public static class Sound
     {
@@ -63,7 +77,7 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
     	    GameOverClip = AudioSystem.getClip();
     	    GameOverClip.open(GameOverAudio);
     	}
-
+        //----Game Start Sound-----
         public void GameStart()
         {
             if(GameStartClip.isRunning())
@@ -73,7 +87,7 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
             GameStartClip.setFramePosition(0);
             GameStartClip.start();
         }
-
+        //----Game Over Sound-----
     	public void GameOver() {
     	    if (GameOverClip.isRunning()) {
     	        GameOverClip.stop();
@@ -84,17 +98,25 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
 
     	
     }
+    //----END----
+
+
+    //----Object Assingment and Game Logic Declarations----
 
     Bird bird;
     Timer gameloop;
     Timer PlacePipesTimer;
-    int VelocityX=-4;
-    int VelocityY=0;
+    int VelocityX=-4; //move pipes to the left speed (simulates bird moving right)
+    int VelocityY=0;  //move bird up/down speed.
     int gravity=1;
     double score=0;
     Boolean gameOver=false;
     Random random = new Random();
     ArrayList<Pipe> pipes;
+
+     //----END----
+ 
+     //----Constructor for implementing Game Functions----
 
     TrickyBird()
     {
@@ -108,7 +130,7 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
         tk = new ImageIcon(getClass().getResource("./tk.png")).getImage();
         spacebutton = new ImageIcon(getClass().getResource("./spacebutton.png")).getImage();
         bird = new Bird(birdImg);
-        gameloop = new Timer(1000/60,this);
+        gameloop = new Timer(1000/60,this); //how long it takes to start timer, milliseconds gone between frames 
         gameloop.start();
 
         pipes = new ArrayList<>();
@@ -129,8 +151,15 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
         PlacePipesTimer.start();
     }
 
+    //----END----
+ 
+     //----Placing Pipes with Correct Positions-----
+
     public void placePipes()
     {
+        //(0-1) * pipeHeight/2.
+        // 0 -> -128 (pipeHeight/4)
+        // 1 -> -128 - 256 (pipeHeight/4 - pipeHeight/2) = -3/4 pipeHeight
         int openspace = fheight/4;
         int randomPipeY=(int) (pipeY-pipeHeight/4-Math.random()*(pipeHeight/2));
         Pipe topPipe = new Pipe(TopPipe);
@@ -141,6 +170,12 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
         bottomPipe.y=topPipe.y+pipeHeight+openspace;
         pipes.add(bottomPipe);
     }
+
+    //----END----
+ 
+ 
+     //----Painting Background ,Bird and Pipes-----
+
     public void paintComponent(Graphics g1)
     {
         Graphics2D g = (Graphics2D)g1;
@@ -174,13 +209,18 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
         {
             g.drawString(String.valueOf((int)score), 10,32 );
         }
-        g.drawImage(tk, (fWidth/2)+40, fheight-30,null);
+        // g.drawImage(tk, (fWidth/2)+40, fheight-30,null);
         // g.setFont(new Font("MV Boli",Font.PLAIN,14));
         // g.setColor(Color.decode("#000000"));
         // // g.setStroke(new BasicStroke(2));
         // g.drawString("Created By Tharun", (fWidth/2)+35, fheight-10);
        
     }
+
+    //----END----
+ 
+    //----Movement and Logics----
+
     public void move() throws UnsupportedAudioFileException, IOException, LineUnavailableException, InterruptedException
     {
         VelocityY+=gravity;
@@ -194,7 +234,7 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
             {
             	
                 pipe.passed=true;
-                score +=0.5;
+                score +=0.5; //0.5 because there are 2 pipes! so 0.5*2 = 1, 1 for each set of pipes
                 
             }
             
@@ -210,11 +250,16 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
     }
     public Boolean hit(Bird a , Pipe b)
     {
-        return a.birdX<b.x+b.width &&
-               a.birdX+a.birdWidth>b.x &&
-               a.birdY<b.y+b.height &&
-               a.birdY+a.birdHeight>b.y;
+        return a.birdX<b.x+b.width && //a's top left corner doesn't reach b's top right corner
+               a.birdX+a.birdWidth>b.x && //a's top right corner passes b's top left corner
+               a.birdY<b.y+b.height && //a's top left corner doesn't reach b's bottom left corner
+               a.birdY+a.birdHeight>b.y; //a's bottom left corner passes b's top left corner
     }
+
+     //----END----
+ 
+     //----ActionListener Implementations----
+
     @Override
     public void actionPerformed(ActionEvent e) {
        
@@ -241,7 +286,9 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
         }
     }
 
+     //----END----
 
+     //----KeyEvent Implementations----
     
     @Override
     public void keyPressed(KeyEvent e) {
@@ -268,9 +315,10 @@ public class TrickyBird extends JPanel implements ActionListener, KeyListener{
 
         }
         }
-        
-        
     }
+    //----END----
+
+    //----not used there---
     @Override
     public void keyTyped(KeyEvent e) {}
     @Override
